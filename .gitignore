@@ -1,0 +1,4 @@
+bin/main
+bin/tests
+bin/external_libraries
+lib/*.a
