@@ -2,3 +2,5 @@ bin/main
 bin/tests
 bin/external_libraries
 lib/*.a
+build/*
+!build/.dummy
