@@ -14,13 +14,13 @@ include_directories (
 #link_directories (${OpenGL_LIBRARY_DIR} ${LIBRARY_OUTPUT_PATH})
 #add_definitions(${OpenGL_DEFINITIONS})
 
-add_library (dr display.cpp mesh.cpp shader.cpp)
+add_library (dr display.cpp mesh.cpp shader.cpp tiny_obj_loader.cpp)
 add_executable (main main.cpp)
 add_executable (tests tests.cpp)
 
 
 set (librarylist dr ${OPENGL_LIBRARIES} 
-    ${GLEW_LIBRARIES} ${SDL2_LIBRARY}  ${GTEST_BOTH_LIBRARIES})
+    ${GLEW_LIBRARIES} ${SDL2_LIBRARY} ${GTEST_BOTH_LIBRARIES})
 foreach(libname ${librarylist})
     message (STATUS "linking to: " ${libname})
 endforeach(libname)

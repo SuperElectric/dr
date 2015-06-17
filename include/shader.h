@@ -16,5 +16,4 @@ class Shader
         GLuint m_program;
         GLuint m_shaders[NUM_SHADERS];
 };
-
 #endif // SHADER_H
