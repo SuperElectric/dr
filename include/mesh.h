@@ -4,19 +4,19 @@
 #include <GL/glew.h>
 #include "tiny_obj_loader.h"
 
-class Vertex{
-    public:
-    Vertex(const glm::vec3 position){
-        this->position = position;
-    }
-    private:
-    glm::vec3 position;
-};
+//class Vertex{
+//    public:
+//    Vertex(const glm::vec3 position){
+//        this->position = position;
+//    }
+//    private:
+//    glm::vec3 position;
+//};
 
 class Mesh{
     public:
         //Mesh(Vertex* vertices, unsigned int numVertices);
-        Mesh(char* fileName, char* mtlBasePath=NULL, int object=0);
+        Mesh(const char* fileName, char* mtlBasePath=NULL, int object=0);
         Mesh(const tinyobj::shape_t &shape,
              const std::vector<tinyobj::material_t> &materials);
         void Draw();

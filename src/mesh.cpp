@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-Mesh::Mesh(char* fileName, char* mtlBasePath, int object)
+Mesh::Mesh(const char* fileName, char* mtlBasePath, int object)
 {
     std::vector <tinyobj::shape_t> shapes;
     std::vector <tinyobj::material_t> materials;
