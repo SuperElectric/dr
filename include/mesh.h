@@ -12,7 +12,9 @@ class Mesh{
              const std::vector<tinyobj::material_t> &materials);
         void Draw();
         virtual ~Mesh();
-        enum {XYZ_ATTRIBUTE,UV_ATTRIBUTE,NORMALS_ATTRIBUTE};
+        enum {ATTRIBUTE_VERTEX_POSITIONS,
+              ATTRIBUTE_VERTEX_TEX_COORDS,
+              ATTRIBUTE_VERTEX_NORMALS};
     private:
         enum {XYZ_VB=0, UV_VB=1, NORMALS_VB=2, INDEX_VB=3, NUM_BUFFERS=4};
         GLuint m_VAO;

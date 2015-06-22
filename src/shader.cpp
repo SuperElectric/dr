@@ -16,46 +16,41 @@ Shader::Shader(const std::string& fileName){
     for (int i=0; i<NUM_SHADERS; i++){
         glAttachShader(m_program, m_shaders[i]);
     }
-    glBindAttribLocation(m_program, Mesh::XYZ_ATTRIBUTE, "position");
-    glBindAttribLocation(m_program, Mesh::UV_ATTRIBUTE, "texCoord");
-	glBindAttribLocation(m_program, Mesh::NORMALS_ATTRIBUTE, "normal");
+    glBindAttribLocation(m_program, Mesh::ATTRIBUTE_VERTEX_POSITIONS, "vertexPosition");
+    glBindAttribLocation(m_program, Mesh::ATTRIBUTE_VERTEX_TEX_COORDS, "vertexTexCoord");
+	glBindAttribLocation(m_program, Mesh::ATTRIBUTE_VERTEX_NORMALS, "vertexNormal");
     glLinkProgram(m_program);
     CheckShaderError(m_program, GL_LINK_STATUS, true, "Error: Program linking failed: ");
     glValidateProgram(m_program);
     CheckShaderError(m_program, GL_VALIDATE_STATUS, true, "Error: Program is invalid: ");
-    m_uniforms[U_TRANSFORM_4x4_MATRIX] = glGetUniformLocation(m_program, "transformMatrix");
-    m_uniforms[U_TRANSFORM_3X3_ROTATION_MATRIX] = glGetUniformLocation(m_program, "rotationMatrix");
-    m_uniforms[U_CAMERA_MATRIX] = glGetUniformLocation(m_program, "cameraMatrix");
+    m_uniforms[U_CAMERA_4X4_TRANSFORM_MATRIX] = glGetUniformLocation(m_program, "cameraTransformMatrix");
+    m_uniforms[U_CAMERA_3X3_ROTATION_MATRIX] = glGetUniformLocation(m_program, "cameraRotationMatrix");
+    m_uniforms[U_CAMERA_4X4_PROJECTION_MATRIX] = glGetUniformLocation(m_program, "cameraProjectionMatrix");
     m_uniforms[U_LIGHT_POSITION] = glGetUniformLocation(m_program, "lightPosition");
+    m_uniforms[U_LIGHT_COLOUR] = glGetUniformLocation(m_program, "lightColour");
+    m_uniforms[U_MATERIAL_DIFFUSE_COLOUR] = glGetUniformLocation(m_program, "materialDiffuseColour");
+    m_uniforms[U_MATERIAL_SPECULAR_COLOUR] = glGetUniformLocation(m_program, "materialSpecularColour");
+    m_uniforms[U_MATERIAL_SPECULAR_HARDNESS] = glGetUniformLocation(m_program, "materialSpecularHardness");
 }
 
-void Shader::Update(float t){
-    // temporary hard coded values
-    float c = glm::cos(t);
-    float s = glm::sin(t);
-    // elements listed in column major order, so matrix is transpose of one below
-    glm::mat4 transformMatrix = glm::mat4(  c,0.0, -s,0.0,
-                                          0.0,1.0,0.0,0.0,
-                                            s,0.0,  c,0.0,
-                                          0.0,0.0,-2.0,1.0);
 
-    glm::mat3 rotationMatrix = glm::mat3(transformMatrix);
-    float zNear = 0.1;
-    float zFar = 100.0;
-    //glm::mat4 cameraMatrix = glm::perspective(80.0f, 1.0f, zNear, zFar);
-    glm::mat4 cameraMatrix = glm::mat4(1.0,0.0,0.0,0.0,
-                                          0.0,1.0,0.0,0.0,
-                                          0.0,0.0, -(zFar+zNear)/(zFar-zNear),-1.0,
-                                          0.0,0.0,-2.0*zFar*zNear/(zFar-zNear),0.0);
-
-    //glm::mat4 cameraMatrix = glm::mat4();
-    glm::vec3 lightPosition = glm::vec3(0.0,0.0,2.0);
-
-    glUniformMatrix4fv(m_uniforms[U_TRANSFORM_4x4_MATRIX], 1, GL_FALSE, &transformMatrix[0][0]);
-    glUniformMatrix3fv(m_uniforms[U_TRANSFORM_3X3_ROTATION_MATRIX], 1, GL_FALSE, &rotationMatrix[0][0]);
-    glUniformMatrix4fv(m_uniforms[U_CAMERA_MATRIX], 1, GL_FALSE, &cameraMatrix[0][0]);
-    glUniform3fv(m_uniforms[U_LIGHT_POSITION], 1, &lightPosition[0]);
+void Shader::Update(ParameterVector& parameters){
+    glUniformMatrix4fv(m_uniforms[U_CAMERA_4X4_TRANSFORM_MATRIX], 1, GL_FALSE,
+                       &parameters.cameraTransformMatrix[0][0]);
+    glUniformMatrix3fv(m_uniforms[U_CAMERA_3X3_ROTATION_MATRIX], 1, GL_FALSE,
+                       &parameters.cameraRotationMatrix[0][0]);
+    glUniformMatrix4fv(m_uniforms[U_CAMERA_4X4_PROJECTION_MATRIX], 1, GL_FALSE,
+                       &parameters.cameraProjectionMatrix[0][0]);
+    glUniform3fv(m_uniforms[U_LIGHT_POSITION], 1, &parameters.lightPosition[0]);
+    glUniform3fv(m_uniforms[U_LIGHT_COLOUR], 1, &parameters.lightColour[0]);
+    glUniform3fv(m_uniforms[U_MATERIAL_DIFFUSE_COLOUR], 1,
+                 &parameters.materialDiffuseColour[0]);
+    glUniform3fv(m_uniforms[U_MATERIAL_SPECULAR_COLOUR], 1,
+                 &parameters.materialSpecularColour[0]);
+    glUniform1fv(m_uniforms[U_MATERIAL_SPECULAR_HARDNESS], 1,
+                 &parameters.materialSpecularHardness);
 }
+
 
 Shader::~Shader(){
     for (int i=0; i<NUM_SHADERS; i++){
