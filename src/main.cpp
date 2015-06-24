@@ -17,7 +17,7 @@ int main()
     GLint _maxTextureSize;
     glGetIntegerv(GL_MAX_DRAW_BUFFERS,&_maxTextureSize);
     std::cout<< "GL_MAX_DRAW_BUFFERS : %d\n" << _maxTextureSize << std::endl;
-    Display display(1024,1024, "Hello World!");
+    Display display(1024,1024, "Hello World!", 2);
     Mesh mesh ((DR_DIRECTORY + "/assets/monkey.obj").c_str());
     Shader shader((DR_DIRECTORY + "/assets/basicShader").c_str());
     shader.Bind();
@@ -40,18 +40,18 @@ int main()
                                                  s ,0.0, c ,0.0,
                                                 0.0,0.0,-2.0,1.0);
     parameters.cameraRotationMatrix = glm::mat3(parameters.cameraTransformMatrix);
+    parameters.materialDiffuseColour = glm::vec3(1.0,0.0,0.0);
+    shader.Update(parameters);
+    display.SetFrameBuffer(0);
+    display.Clear(0.0f,0.0f,0.0f,1.0f);
+    mesh.Draw();
     parameters.materialDiffuseColour = glm::vec3(0.0,1.0,0.0);
     shader.Update(parameters);
     display.SetFrameBuffer(1);
     display.Clear(0.0f,0.0f,0.0f,1.0f);
     mesh.Draw();
-    parameters.materialDiffuseColour = glm::vec3(1.0,0.0,0.0);
-    shader.Update(parameters);
-    display.SetFrameBuffer(2);
-    display.Clear(0.0f,0.0f,0.0f,1.0f);
-    mesh.Draw();
 
-    display.SetFrameBuffer(2);
+    display.SetFrameBuffer(1);
 
     display.CopyFrameBuffer();
     display.Update();
