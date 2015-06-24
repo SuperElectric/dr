@@ -111,12 +111,10 @@ bool Display::IsClosed(){
 void Display::Update(){
     SDL_GL_SwapWindow(m_window);
 
-    // Event handling :
-
-//    SDL_Event e;
-//    while(SDL_PollEvent(&e)){
-//        if(e.type == SDL_QUIT){
-//            m_isClosed = true;
-//        }
-//    }
+    SDL_Event e;
+    while(SDL_PollEvent(&e)){
+        if(e.type == SDL_QUIT){
+            m_isClosed = true;
+        }
+    }
 }

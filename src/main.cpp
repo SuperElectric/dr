@@ -3,6 +3,7 @@
 #include <cstring>
 #include <GL/glew.h>
 #include "glm/glm.hpp"
+#include "glm/gtx/transform.hpp"
 #include "display.h"
 #include "mesh.h"
 #include "shader.h"
@@ -51,7 +52,12 @@ int main()
     display.Clear(0.0f,0.0f,0.0f,1.0f);
     mesh.Draw();
 
-    display.SetFrameBuffer(1);
+    if ((int)t % 120 < 60){
+        display.SetFrameBuffer(0);
+    }
+    else{
+        display.SetFrameBuffer(1);
+    }
 
     display.CopyFrameBuffer();
     display.Update();

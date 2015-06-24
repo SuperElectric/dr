@@ -1,8 +1,7 @@
 #ifndef PARAMETERVECTOR_H
 #define PARAMETERVECTOR_H
 #include "glm/glm.hpp"
-//temporary
-#include "glm/gtx/transform.hpp""
+//#include "glm/gtx/transform.hpp"
 #include "GL/glew.h"
 
 class ParameterVector
