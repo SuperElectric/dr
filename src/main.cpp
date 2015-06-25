@@ -52,7 +52,7 @@ int main()
     display.Clear(0.0f,0.0f,0.0f,1.0f);
     mesh.Draw();
 
-    if ((int)t % 120 < 60){
+    if ((int)t % 120  < 60){
         display.SetFrameBuffer(0);
     }
     else{

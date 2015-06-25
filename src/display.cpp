@@ -11,8 +11,8 @@ Display::Display(int width, int height, const std::string& title,
 
     m_width = width;
     m_height = height;
-    m_render_width = width;
-    m_render_height = height;
+    m_render_width = 1.0*width;
+    m_render_height = 1.0*height;
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -21,6 +21,7 @@ Display::Display(int width, int height, const std::string& title,
     SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    //SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
     //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
     m_window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED,
                                 SDL_WINDOWPOS_CENTERED, width, height,
@@ -45,11 +46,11 @@ Display::Display(int width, int height, const std::string& title,
     m_renderbuffers = new GLuint* [NUM_FRAME_BUFFERS];
     m_framebuffers = new GLuint [NUM_FRAME_BUFFERS];
     glGenFramebuffers(NUM_FRAME_BUFFERS, m_framebuffers);
-    for (int i=0; i<NUM_RENDER_BUFFERS; i++){
+    for (int i=0; i<NUM_FRAME_BUFFERS; i++){
         m_renderbuffers[i] = new GLuint [NUM_RENDER_BUFFERS];
         glGenRenderbuffers(NUM_RENDER_BUFFERS, m_renderbuffers[i]);
         glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffers[i][RB_COLOUR]);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, m_render_width, m_render_height);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA32F, m_render_width, m_render_height);
         glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffers[i][RB_DEPTH]);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, m_render_width, m_render_height);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_framebuffers[i]);
@@ -66,8 +67,8 @@ Display::Display(int width, int height, const std::string& title,
 
 Display::~Display()
 {
-    for (int i=0; i<NUM_RENDER_BUFFERS; i++){
-        glDeleteRenderbuffers(NUM_FRAME_BUFFERS, m_renderbuffers[i]);
+    for (int i=0; i<NUM_FRAME_BUFFERS; i++){
+        glDeleteRenderbuffers(NUM_RENDER_BUFFERS, m_renderbuffers[i]);
         delete[] m_renderbuffers[i];
     }
     delete[] m_renderbuffers;
@@ -92,6 +93,7 @@ void Display::SetFrameBuffer(int n){
     else {
         glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffers[n]);
     }
+    glViewport(0,0,m_render_width,m_render_height);
 }
 
 void Display::CopyFrameBuffer(){
