@@ -11,7 +11,7 @@ class Display
                 const int numberOfFrameBuffers=0);
         void Clear(float r, float g, float b, float a);
         void Update();
-        void SetFrameBuffer(int n);
+        void SetFrameBuffer(int n=-1);
         void CopyFrameBuffer();
         bool IsClosed();
         virtual ~Display();
