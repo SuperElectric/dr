@@ -17,9 +17,13 @@ std::string dr_directory(){
 }
 std::string DR_DIRECTORY = dr_directory();
 
+
+
 void rotatingMonkeyLoop()
 {
-    Display display(1024,1024, "Hello World!", 2);
+    int width = 1024;
+    int height = 1024;
+    Display display(width,height, "Hello World!", 1, 2);
     Mesh mesh ((DR_DIRECTORY + "/assets/monkey.obj").c_str());
     Shader shader((DR_DIRECTORY + "/assets/basicShader").c_str());
     shader.Bind();
@@ -32,6 +36,9 @@ void rotatingMonkeyLoop()
     parameters.materialDiffuseColour = glm::vec3(1.0,0.0,0.0);
     parameters.materialSpecularColour = glm::vec3(1.0,1.0,1.0);
     parameters.materialSpecularHardness = 10.0;
+
+    float* pixels = new float[width*height*3];
+
 
     float t=0, x=0, c=0, s=0;
     while(!display.IsClosed())
@@ -48,27 +55,25 @@ void rotatingMonkeyLoop()
         display.SetFrameBuffer(0);
         display.Clear(0.0f,0.0f,0.0f,1.0f);
         mesh.Draw();
-        parameters.materialDiffuseColour = glm::vec3(0.0,1.0,0.0);
-        shader.Update(parameters);
-        display.SetFrameBuffer(1);
-        display.Clear(0.0f,0.0f,0.0f,1.0f);
-        mesh.Draw();
 
         if ((int)t % 120  < 60)
         {
-            display.SetFrameBuffer(0);
+            display.SetRenderBuffer(0,0);
         }
         else
         {
-            display.SetFrameBuffer(1);
+            display.SetRenderBuffer(0,1);
         }
 
         display.CopyFrameBuffer();
+        display.SaveRenderBuffer(pixels);
         display.Update();
         //std::cin.ignore();
         t += 1.0;
         x = 0.01*t;
     }
+
+    delete[] pixels;
 }
 
 int main()

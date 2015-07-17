@@ -3,7 +3,8 @@
 #include <iostream>
 
 Display::Display(int width, int height, const std::string& title,
-                 const int numberOfFrameBuffers)
+                 const int numberOfFrameBuffers,
+                 const int numberOfColourRenderBuffers)
 {
     //
     // Set up SDL window
@@ -40,6 +41,7 @@ Display::Display(int width, int height, const std::string& title,
     //
 
     NUM_FRAME_BUFFERS = numberOfFrameBuffers;
+    NUM_COLOUR_RENDER_BUFFERS = numberOfColourRenderBuffers;
     if (NUM_FRAME_BUFFERS <= 0)
     {
         NUM_FRAME_BUFFERS = 0;
@@ -51,17 +53,20 @@ Display::Display(int width, int height, const std::string& title,
     glGenFramebuffers(NUM_FRAME_BUFFERS, m_framebuffers);
     for (int i=0; i<NUM_FRAME_BUFFERS; i++)
     {
-        m_renderbuffers[i] = new GLuint [NUM_RENDER_BUFFERS];
-        glGenRenderbuffers(NUM_RENDER_BUFFERS, m_renderbuffers[i]);
-        glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffers[i][RB_COLOUR]);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA32F, m_render_width, m_render_height);
-        glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffers[i][RB_DEPTH]);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, m_render_width, m_render_height);
+        m_renderbuffers[i] = new GLuint [NUM_COLOUR_RENDER_BUFFERS+1];
+        glGenRenderbuffers(NUM_COLOUR_RENDER_BUFFERS+1, m_renderbuffers[i]);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_framebuffers[i]);
-        glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                  GL_RENDERBUFFER, m_renderbuffers[i][RB_COLOUR]);
+        for (int j=0; j<NUM_COLOUR_RENDER_BUFFERS; j++)
+        {
+            glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffers[i][j]);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB32F, m_render_width, m_render_height);
+            glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+j,
+                                      GL_RENDERBUFFER, m_renderbuffers[i][j]);
+        }
+        glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffers[i][NUM_COLOUR_RENDER_BUFFERS]);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, m_render_width, m_render_height);
         glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                  GL_RENDERBUFFER, m_renderbuffers[i][RB_DEPTH]);
+                                  GL_RENDERBUFFER, m_renderbuffers[i][NUM_COLOUR_RENDER_BUFFERS]);
     }
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -73,7 +78,7 @@ Display::~Display()
 {
     for (int i=0; i<NUM_FRAME_BUFFERS; i++)
     {
-        glDeleteRenderbuffers(NUM_RENDER_BUFFERS, m_renderbuffers[i]);
+        glDeleteRenderbuffers(NUM_COLOUR_RENDER_BUFFERS+1, m_renderbuffers[i]);
         delete[] m_renderbuffers[i];
     }
     delete[] m_renderbuffers;
@@ -101,8 +106,21 @@ void Display::SetFrameBuffer(int n)
     else
     {
         glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffers[n]);
+        GLenum* renderBufferList = new GLenum[NUM_COLOUR_RENDER_BUFFERS];
+        for(int i=0; i<NUM_COLOUR_RENDER_BUFFERS; i++)
+        {
+            renderBufferList[i] = GL_COLOR_ATTACHMENT0 + i;
+        }
+        glDrawBuffers(NUM_COLOUR_RENDER_BUFFERS, renderBufferList);
+        delete[] renderBufferList;
     }
     glViewport(0,0,m_render_width,m_render_height);
+}
+
+void Display::SetRenderBuffer(int n, int i)
+{
+    //glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffers[n][i]);
+    glReadBuffer(GL_COLOR_ATTACHMENT0+i);
 }
 
 void Display::CopyFrameBuffer()
@@ -115,6 +133,13 @@ void Display::CopyFrameBuffer()
                       0,0,m_width-1,m_height-1,
                       GL_COLOR_BUFFER_BIT, GL_NEAREST);
 };
+
+
+void Display::SaveRenderBuffer(void* pixels)
+{
+    glReadPixels(0,0,m_render_width,m_render_height,GL_RGB,GL_FLOAT,pixels);
+}
+
 
 bool Display::IsClosed()
 {

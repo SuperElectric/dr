@@ -31,6 +31,8 @@ Shader::Shader(const std::string& fileName){
     m_uniforms[U_MATERIAL_DIFFUSE_COLOUR] = glGetUniformLocation(m_program, "materialDiffuseColour");
     m_uniforms[U_MATERIAL_SPECULAR_COLOUR] = glGetUniformLocation(m_program, "materialSpecularColour");
     m_uniforms[U_MATERIAL_SPECULAR_HARDNESS] = glGetUniformLocation(m_program, "materialSpecularHardness");
+    //glBindFragDataLocation(m_program, 0, "outputColour0");
+    //glBindFragDataLocation(m_program, 1, "outputColour1");
 }
 
 
