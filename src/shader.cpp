@@ -36,7 +36,7 @@ Shader::Shader(const std::string& fileName){
 }
 
 
-void Shader::Update(ParameterVector& parameters){
+void Shader::Update(ParameterVector parameters){
     glUniformMatrix4fv(m_uniforms[U_CAMERA_4X4_TRANSFORM_MATRIX], 1, GL_FALSE,
                        &parameters.cameraTransformMatrix[0][0]);
     glUniformMatrix3fv(m_uniforms[U_CAMERA_3X3_ROTATION_MATRIX], 1, GL_FALSE,

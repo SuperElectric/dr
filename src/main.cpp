@@ -10,7 +10,8 @@
 #include "tiny_obj_loader.h"
 #include "parameterVector.h"
 
-std::string dr_directory(){
+std::string dr_directory()
+{
     char* label ("DR_DIRECTORY");
     std::string directory (getenv(label));
     return directory;
@@ -25,20 +26,9 @@ void rotatingMonkeyLoop()
     int height = 1024;
     Display display(width,height, "Hello World!", 1, 2);
     Mesh mesh ((DR_DIRECTORY + "/assets/monkey.obj").c_str());
+    ParameterVector parameters(ParameterVector::DEFAULT);
     Shader shader((DR_DIRECTORY + "/assets/basicShader").c_str());
     shader.Bind();
-    float zNear = 0.1;
-    float zFar = 100.0;
-    ParameterVector parameters;
-    parameters.cameraProjectionMatrix = glm::perspective(80.0f, 1.0f, zNear, zFar);
-    parameters.lightPosition = glm::vec3(0.0,0.0,2.0);
-    parameters.lightColour = glm::vec3(1.0,1.0,1.0);
-    parameters.materialDiffuseColour = glm::vec3(1.0,0.0,0.0);
-    parameters.materialSpecularColour = glm::vec3(1.0,1.0,1.0);
-    parameters.materialSpecularHardness = 10.0;
-
-    float* pixels = new float[width*height*3];
-
 
     float t=0, x=0, c=0, s=0;
     while(!display.IsClosed())
@@ -66,14 +56,11 @@ void rotatingMonkeyLoop()
         }
 
         display.CopyFrameBuffer();
-        display.SaveRenderBuffer(pixels);
         display.Update();
         //std::cin.ignore();
         t += 1.0;
         x = 0.01*t;
     }
-
-    delete[] pixels;
 }
 
 int main()

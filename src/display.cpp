@@ -13,8 +13,8 @@ Display::Display(int width, int height, const std::string& title,
     m_width = width;
     m_height = height;
     // for now, render resolution and window size are set to be the same.
-    m_render_width = 1.0*width;
-    m_render_height = 1.0*height;
+    render_width = 1.0*width;
+    render_height = 1.0*height;
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -59,12 +59,12 @@ Display::Display(int width, int height, const std::string& title,
         for (int j=0; j<NUM_COLOUR_RENDER_BUFFERS; j++)
         {
             glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffers[i][j]);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB32F, m_render_width, m_render_height);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB32F, render_width, render_height);
             glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+j,
                                       GL_RENDERBUFFER, m_renderbuffers[i][j]);
         }
         glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffers[i][NUM_COLOUR_RENDER_BUFFERS]);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, m_render_width, m_render_height);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, render_width, render_height);
         glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                                   GL_RENDERBUFFER, m_renderbuffers[i][NUM_COLOUR_RENDER_BUFFERS]);
     }
@@ -114,7 +114,7 @@ void Display::SetFrameBuffer(int n)
         glDrawBuffers(NUM_COLOUR_RENDER_BUFFERS, renderBufferList);
         delete[] renderBufferList;
     }
-    glViewport(0,0,m_render_width,m_render_height);
+    glViewport(0,0,render_width,render_height);
 }
 
 void Display::SetRenderBuffer(int n, int i)
@@ -129,15 +129,15 @@ void Display::CopyFrameBuffer()
     glViewport(0,0,m_width,m_height);
     //glClearColor(0.0,0.0,1.0,1.0);
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glBlitFramebuffer(0,0,m_render_width-1,m_render_height-1,
+    glBlitFramebuffer(0,0,render_width-1,render_height-1,
                       0,0,m_width-1,m_height-1,
                       GL_COLOR_BUFFER_BIT, GL_NEAREST);
 };
 
 
-void Display::SaveRenderBuffer(void* pixels)
+void Display::SaveRenderBuffer(float* pixels)
 {
-    glReadPixels(0,0,m_render_width,m_render_height,GL_RGB,GL_FLOAT,pixels);
+    glReadPixels(0,0,render_width,render_height,GL_RGB,GL_FLOAT,pixels);
 }
 
 

@@ -15,9 +15,11 @@ class Display
         void SetFrameBuffer(int n=-1);
         void SetRenderBuffer(int n, int i);
         void CopyFrameBuffer();
-        void SaveRenderBuffer(void* pixels);
+        void SaveRenderBuffer(float* pixels);
         bool IsClosed();
         virtual ~Display();
+        int render_width;
+        int render_height;
 
     private:
         SDL_Window* m_window;
@@ -27,8 +29,6 @@ class Display
         GLuint* m_framebuffers;
         int m_width;
         int m_height;
-        int m_render_width;
-        int m_render_height;
         int NUM_FRAME_BUFFERS;
         int NUM_COLOUR_RENDER_BUFFERS;
 

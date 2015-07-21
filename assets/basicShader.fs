@@ -32,7 +32,7 @@ void main()
     //gl_FragColor = vec4(colour,1.0);
     output_image = vec4(colour,1.0);
     output_d_light_r =
-    vec4(blinnPhongDir(lightPosition, vec3(lightColour.x,0.0,0.0), 0.0, 1.0,
+    vec4(blinnPhongDir(lightPosition, vec3(1.0,0.0,0.0), 0.0, 1.0,
                        1.0, materialSpecularHardness, materialDiffuseColour,
                        materialSpecularColour), 1.0);
     
