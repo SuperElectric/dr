@@ -24,7 +24,7 @@ void rotatingMonkeyLoop()
 {
     int width = 1024;
     int height = 1024;
-    Display display(width,height, "Hello World!", 1, 2);
+    Display display(width,height, "Hello World!", 1, 4);
     Mesh mesh ((DR_DIRECTORY + "/assets/monkey.obj").c_str());
     ParameterVector parameters(ParameterVector::DEFAULT);
     Shader shader((DR_DIRECTORY + "/assets/basicShader").c_str());
@@ -40,21 +40,23 @@ void rotatingMonkeyLoop()
                                            s ,0.0, c ,0.0,
                                            0.0,0.0,-2.0,1.0);
         parameters.cameraRotationMatrix = glm::mat3(parameters.cameraTransformMatrix);
-        parameters.materialDiffuseColour = glm::vec3(1.0,0.0,0.0);
         shader.Update(parameters);
         display.SetFrameBuffer(0);
         display.Clear(0.0f,0.0f,0.0f,1.0f);
         mesh.Draw();
 
-        if ((int)t % 120  < 60)
+        if ((int)t % 180  < 60)
         {
             display.SetRenderBuffer(0,0);
         }
-        else
+        else if ((int)t % 180  < 120)
         {
             display.SetRenderBuffer(0,1);
         }
-
+        else
+        {
+            display.SetRenderBuffer(0,3);
+        }
         display.CopyFrameBuffer();
         display.Update();
         //std::cin.ignore();

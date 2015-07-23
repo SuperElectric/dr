@@ -25,7 +25,7 @@ void takePixelDifferences (float* pixels1, float* pixels0, float divisor,
 {
     for (int i=0; i<arraySize; i++)
     {
-        outputPixels[i] = (pixels1[i] - pixels0[i]) / divisor;
+        outputPixels[i] = float(double (pixels1[i] - pixels0[i]) / double(divisor));
     }
 }
 
@@ -83,11 +83,23 @@ void redDerivative(Display& display, Mesh& mesh, Shader& shader,
     display.SaveRenderBuffer(pixels);
 }
 
+void lightDirectionXDerivative(Display& display, Mesh& mesh, Shader& shader,
+                   ParameterVector& location,
+                   float* pixels)
+{
+    shader.Update(location);
+    display.SetFrameBuffer(0);
+    display.Clear(0.0f,0.0f,0.0f,1.0f);
+    mesh.Draw();
+    display.SetRenderBuffer(0,2);  // read from the light-x-direction derivative renderbuffer
+    display.SaveRenderBuffer(pixels);
+}
 
-float test(){
+
+void test(float* errors){
     int width = 1024;
     int height = 1024;
-    Display display(width,height, "Test", 1, 2);
+    Display display(width,height, "Test", 1, 3);
     Mesh mesh ((DR_DIRECTORY + "/assets/monkey.obj").c_str());
     ParameterVector parameters(ParameterVector::DEFAULT);
     Shader shader((DR_DIRECTORY + "/assets/basicShader").c_str());
@@ -95,26 +107,38 @@ float test(){
 
     ParameterVector directionRed (ParameterVector::ZEROES);
     directionRed.lightColour = glm::vec3(1.0,0.0,0.0);
+    ParameterVector directionLightDirectionX = (ParameterVector::ZEROES);
+    directionLightDirectionX.lightPosition = glm::vec3(1.0,0.0,0.0);
 
     int pixelArraySize =  display.render_width*display.render_height*3;
     float* analyticDerivativePixels = new float[pixelArraySize];
     float* numericalDerivativePixels = new float[pixelArraySize];
+
     redDerivative(display,mesh,shader,parameters,analyticDerivativePixels);
     numericalDerivative(display,mesh,shader,parameters,directionRed,0.001,numericalDerivativePixels);
-    float error = comparePixels(analyticDerivativePixels,
+    errors[0] = comparePixels(analyticDerivativePixels,
                                 numericalDerivativePixels,
                                 pixelArraySize);
+
+    lightDirectionXDerivative(display,mesh,shader,parameters,analyticDerivativePixels);
+    numericalDerivative(display,mesh,shader,parameters,directionLightDirectionX,0.001,numericalDerivativePixels);
+    errors[1] = comparePixels(analyticDerivativePixels,
+                              numericalDerivativePixels,
+                              pixelArraySize);
+
     delete[] analyticDerivativePixels;
     delete[] numericalDerivativePixels;
-
-    return error;
 }
 
 
-TEST(DerivativeTest, Red)
+TEST(DerivativeTest, All)
 {
-    std::cout << test() << std::endl;
-    ASSERT_GE(0.001, test());
+    float errors[2] = {0.0,0.0};
+    test(errors);
+    std::cout << "light-brightness-red-component derivative error was " << errors[0] << std::endl;
+    std::cout << "light-position-x-component derivative error was " << errors[1] << std::endl;
+    ASSERT_GE(0.1, errors[0]);
+    ASSERT_GE(0.1, errors[1]);
 }
 
 
