@@ -5,7 +5,6 @@ ParameterVector::ParameterVector(int e)
     if (e == ZEROES or e<0 or e>=NUM_CONSTRUCTORS)
     {
         cameraTransformMatrix = glm::mat4(0.0);
-        cameraRotationMatrix = glm::mat3(0.0);
         cameraProjectionMatrix = glm::mat4(0.0);
         lightPosition = glm::vec3(0.0,0.0,0.0);
         lightColour = glm::vec3(0.0,0.0,0.0);
@@ -19,7 +18,6 @@ ParameterVector::ParameterVector(int e)
                                            0.0,1.0,0.0,0.0,
                                            0.0 ,0.0, 1.0 ,0.0,
                                            0.0,0.0,-2.0,1.0);
-        cameraRotationMatrix = glm::mat3(cameraTransformMatrix);
         float zNear = 0.1;
         float zFar = 100.0;
         cameraProjectionMatrix = glm::perspective(80.0f, 1.0f, zNear, zFar);
@@ -35,7 +33,6 @@ ParameterVector operator+(ParameterVector a, ParameterVector b)
 {
     ParameterVector result(ParameterVector::ZEROES);
     result.cameraTransformMatrix = a.cameraTransformMatrix + b.cameraTransformMatrix;
-    result.cameraRotationMatrix = a.cameraRotationMatrix + b.cameraRotationMatrix;
     result.cameraProjectionMatrix = a.cameraProjectionMatrix + b.cameraProjectionMatrix;
     result.lightPosition = a.lightPosition + b.lightPosition;
     result.lightColour = a.lightColour + b.lightColour;
@@ -49,7 +46,6 @@ ParameterVector operator*(float a, ParameterVector b)
 {
     ParameterVector result(ParameterVector::ZEROES);
     result.cameraTransformMatrix = a*b.cameraTransformMatrix;
-    result.cameraRotationMatrix = a*b.cameraRotationMatrix;
     result.cameraProjectionMatrix = a*b.cameraProjectionMatrix;
     result.lightPosition = a*b.lightPosition;
     result.lightColour = a*b.lightColour;

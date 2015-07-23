@@ -117,8 +117,8 @@ void test(float* errors){
     redDerivative(display,mesh,shader,parameters,analyticDerivativePixels);
     numericalDerivative(display,mesh,shader,parameters,directionRed,0.001,numericalDerivativePixels);
     errors[0] = comparePixels(analyticDerivativePixels,
-                                numericalDerivativePixels,
-                                pixelArraySize);
+                              numericalDerivativePixels,
+                              pixelArraySize);
 
     lightDirectionXDerivative(display,mesh,shader,parameters,analyticDerivativePixels);
     numericalDerivative(display,mesh,shader,parameters,directionLightDirectionX,0.001,numericalDerivativePixels);

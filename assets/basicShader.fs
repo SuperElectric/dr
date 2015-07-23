@@ -1,8 +1,8 @@
 #version 430
 
-varying vec3 fPosition;
-varying vec2 fTexCoord;
-varying vec3 fNormal;
+in vec3 fPosition;
+in vec2 fTexCoord;
+in vec3 fNormal;
 uniform vec3 lightPosition;
 uniform vec3 lightColour;
 uniform vec3 materialDiffuseColour;

@@ -12,7 +12,6 @@ public:
 
     ParameterVector(int e);
     glm::mat4 cameraTransformMatrix;
-    glm::mat3 cameraRotationMatrix;
     glm::mat4 cameraProjectionMatrix;
     glm::vec3 lightPosition;
     glm::vec3 lightColour;

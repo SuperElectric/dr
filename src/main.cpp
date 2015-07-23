@@ -39,7 +39,6 @@ void rotatingMonkeyLoop()
                                            0.0,1.0,0.0,0.0,
                                            s ,0.0, c ,0.0,
                                            0.0,0.0,-2.0,1.0);
-        parameters.cameraRotationMatrix = glm::mat3(parameters.cameraTransformMatrix);
         shader.Update(parameters);
         display.SetFrameBuffer(0);
         display.Clear(0.0f,0.0f,0.0f,1.0f);
