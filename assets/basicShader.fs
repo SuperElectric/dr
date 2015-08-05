@@ -9,6 +9,8 @@ uniform vec3 materialDiffuseColour;
 uniform vec3 materialSpecularColour;
 uniform float materialSpecularHardness;
 
+uniform sampler2D sampler;
+
 layout (location=0) out vec4 output_image;
 layout (location=1) out vec4 output_d_light_r;
 layout (location=2) out vec4 output_d_light_direction_x;
@@ -66,18 +68,19 @@ mat3 blinnPhongDirDerivativeWrtLightDir (vec3 lightDir, vec3 lightColour, float 
 
 void main()
 {
-    vec3 colour = blinnPhongDir(lightPosition,lightColour,0.3, 1.0, 1.0,
-                                materialSpecularHardness, materialDiffuseColour,
+    vec3 diffColour = vec3(texture2D(sampler, vec2(fTexCoord.x,1.0-fTexCoord.y)));
+    vec3 colour = blinnPhongDir(lightPosition,lightColour,1.0, 0.0, 0.1,
+                                materialSpecularHardness, diffColour,
                                 materialSpecularColour);
     //gl_FragColor = vec4(colour,1.0);
     output_image = vec4(colour,1.0);
-    output_d_light_r =
-    vec4(blinnPhongDir(lightPosition, vec3(1.0,0.0,0.0), 0.0, 1.0, 1.0,
-                       materialSpecularHardness, materialDiffuseColour,
+    output_d_light_r = 
+    vec4(blinnPhongDir(lightPosition, vec3(1.0,0.0,0.0), 0.0, 1.0, 0.1,
+                       materialSpecularHardness, diffColour,
                        materialSpecularColour), 1.0);
     mat3 derivativeWrtLightDir = blinnPhongDirDerivativeWrtLightDir(
-                                lightPosition,lightColour,0.3, 1.0, 1.0,
-                                materialSpecularHardness, materialDiffuseColour,
+                                lightPosition,lightColour,1.0, 0.0, 0.1,
+                                materialSpecularHardness, diffColour,
                                 materialSpecularColour);
     output_d_light_direction_x = vec4(derivativeWrtLightDir*vec3(1.0,0.0,0.0),1.0);
     
