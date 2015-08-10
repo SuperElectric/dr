@@ -21,10 +21,10 @@ ParameterVector::ParameterVector(int e)
         float zNear = 0.1;
         float zFar = 100.0;
         cameraProjectionMatrix = glm::perspective(80.0f, 1.0f, zNear, zFar);
-        lightPosition = glm::vec3(0.0,0.0,2.0);
+        lightPosition = glm::vec3(-1.0,1.0,0.0);
         lightColour = glm::vec3(1.0,1.0,1.0);
         materialDiffuseColour = glm::vec3(0.5,0.5,0.5);
-        materialSpecularColour = glm::vec3(1.0,1.0,1.0);
+        materialSpecularColour = glm::vec3(0.0,0.0,0.0);
         materialSpecularHardness = 10.0;
     }
 }

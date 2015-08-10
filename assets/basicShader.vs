@@ -6,8 +6,10 @@ in vec3 vertexNormal;
 out vec3 fPosition;
 out vec2 fTexCoord;
 out vec3 fNormal;
+out vec3 lightPositionWorldSpace;
 uniform mat4 cameraTransformMatrix;
 uniform mat4 cameraProjectionMatrix;
+uniform vec3 lightPosition;
 
 void main()
 {	
@@ -17,4 +19,5 @@ void main()
     fTexCoord = vertexTexCoord;
     fNormal = normalize(cameraRotationMatrix*vertexNormal);
     gl_Position = cameraProjectionMatrix*pos;
+    lightPositionWorldSpace = inverse(cameraRotationMatrix)*lightPosition;
 }

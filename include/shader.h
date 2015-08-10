@@ -12,6 +12,7 @@ class Shader
         void Bind();
         void Update(float t);
         void Update(ParameterVector parameters);
+        GLint GetUniformLocation(char* name);
         virtual ~Shader();
     protected:
     private:

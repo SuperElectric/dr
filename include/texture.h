@@ -8,7 +8,7 @@ class Texture
 {
     public:
         Texture(const char* fileName);
-        void Bind(int i);
+        void Bind(int i, GLint location);
         virtual ~Texture();
     private:
         Texture(const Texture& texture) {}

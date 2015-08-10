@@ -28,8 +28,9 @@ Texture::~Texture()
 	glDeleteTextures(1, &m_texture);
 }
 
-void Texture::Bind(int i)
+void Texture::Bind(int i, GLint location)
 {
+    glUniform1i(location, i);
     glActiveTexture(GL_TEXTURE0+i);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 }
