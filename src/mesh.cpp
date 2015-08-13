@@ -44,7 +44,7 @@ void Mesh::init(const tinyobj::shape_t &shape,
     glGenBuffers(NUM_BUFFERS, m_buffers);
 
     GLint currentBufferBinding;
-    //glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &currentBufferBinding);
+    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &currentBufferBinding);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[XYZ_VB]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(positions[0])*positions.size(),

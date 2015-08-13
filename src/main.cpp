@@ -10,42 +10,33 @@
 #include "tiny_obj_loader.h"
 #include "parameterVector.h"
 #include "texture.h"
-
-std::string dr_directory()
-{
-    char* label ("DR_DIRECTORY");
-    std::string directory (getenv(label));
-    return directory;
-}
-std::string DR_DIRECTORY = dr_directory();
-
-
+//#include "scene.h"
 
 void rotatingMonkeyLoop()
 {
+    char* label ("DR_DIRECTORY");
+    std::string DR_DIRECTORY (getenv(label));
+
     int width = 1024;
     int height = 1024;
     Display display(width,height, "Hello World!", 1, 4);
     Mesh mesh ((DR_DIRECTORY + "/assets/monkey2.obj").c_str());
     ParameterVector parameters(ParameterVector::DEFAULT);
-    Shader shader((DR_DIRECTORY + "/assets/basicShader").c_str());
+    Shader shader(DR_DIRECTORY + "/assets/basicShader");
     shader.Bind();
     Texture texture0 ((DR_DIRECTORY + "/assets/monkey_light_0.png").c_str());
-    GLint loc0 = shader.GetUniformLocation("sampler_0");
-    texture0.Bind(0, loc0);
+    texture0.Bind(1, "sampler_0");
     Texture texture1 ((DR_DIRECTORY + "/assets/monkey_light_1.png").c_str());
-    GLint loc1 = shader.GetUniformLocation("sampler_1");
-    texture0.Bind(1, loc1);
+    texture0.Bind(2, "sampler_1");
     Texture texture2 ((DR_DIRECTORY + "/assets/monkey_light_2.png").c_str());
-    GLint loc2 = shader.GetUniformLocation("sampler_2");
-    texture0.Bind(2, loc2);
+    texture0.Bind(3, "sampler_2");
     Texture texture3 ((DR_DIRECTORY + "/assets/monkey_light_3.png").c_str());
-    GLint loc3 = shader.GetUniformLocation("sampler_3");
-    texture0.Bind(3, loc3);
+    texture0.Bind(4, "sampler_3");
 
     float t=0, x=0, c=0, s=0;
     while(!display.IsClosed())
     {
+        shader.Bind();
         c = glm::cos(x);
         s = glm::sin(x);
         float elev = 0.5;
@@ -62,25 +53,37 @@ void rotatingMonkeyLoop()
         display.Clear(0.0f,0.0f,0.0f,1.0f);
         mesh.Draw();
 
-        if ((int)t % 180 < 200)
         {
-            display.SetRenderBuffer(0,0);
+            int i=0;
+            int n=0;
+            if ((int)t % 180 < 200)
+            {
+                //display.SetRenderBuffer(0,0);
+                i=0;
+            }
+            else if ((int)t % 180 < 120)
+            {
+                //display.SetRenderBuffer(0,1);
+                i=1;
+            }
+            else
+            {
+                //display.SetRenderBuffer(0,2);
+                i=2;
+            }
+            display.ShowTexture(n,i);
+            //display.CopyFrameBuffer();
+            display.Update();
         }
-        else if ((int)t % 180 < 120)
-        {
-            display.SetRenderBuffer(0,1);
-        }
-        else
-        {
-            display.SetRenderBuffer(0,3);
-        }
-        display.CopyFrameBuffer();
-        display.Update();
         //std::cin.ignore();
         t += 1.0;
         x = 0.01*t;
     }
 }
+
+//void monkeyloop2(){
+//    Scene scene();
+//}
 
 int main()
 {

@@ -5,11 +5,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
 
-static std::string LoadShader(const std::string& fileName);
-static void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string& errorMessage);
-static GLuint CreateShader(const std::string& text, GLenum shaderType);
-
-Shader::Shader(const std::string& fileName){
+Shader::Shader(std::string fileName){
     m_program = glCreateProgram();
     m_shaders[0] = CreateShader(LoadShader(fileName + ".vs"), GL_VERTEX_SHADER);
     m_shaders[1] = CreateShader(LoadShader(fileName + ".fs"), GL_FRAGMENT_SHADER);
@@ -69,7 +65,7 @@ GLint Shader::GetUniformLocation(char* name){
     return glGetUniformLocation(m_program, name);
 }
 
-static GLuint CreateShader(const std::string& text, GLenum shaderType){
+GLuint CreateShader(const std::string& text, GLenum shaderType){
     GLuint shader = glCreateShader(shaderType);
     if (shader == 0){
         std::cerr << "Error: Shader creation failed!" << std::endl;
@@ -85,7 +81,7 @@ static GLuint CreateShader(const std::string& text, GLenum shaderType){
 }
 
 
-static std::string LoadShader(const std::string& fileName){
+std::string LoadShader(std::string fileName){
     std::ifstream file;
     file.open((fileName).c_str());
 
@@ -108,7 +104,7 @@ static std::string LoadShader(const std::string& fileName){
     return output;
 }
 
-static void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string& errorMessage){
+void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string& errorMessage){
     GLint success = 0;
     GLchar error[1024] = { 0 };
 

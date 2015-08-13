@@ -28,9 +28,11 @@ Texture::~Texture()
 	glDeleteTextures(1, &m_texture);
 }
 
-void Texture::Bind(int i, GLint location)
-{
-    glUniform1i(location, i);
+void Texture::Bind(int i, char* samplerName){
     glActiveTexture(GL_TEXTURE0+i);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
+    glBindTexture(GL_TEXTURE_2D, m_texture);
+    GLint shader;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &shader);
+    glUniform1i(glGetUniformLocation(shader, samplerName), i);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }

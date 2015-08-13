@@ -11,14 +11,6 @@
 #include "parameterVector.h"
 #include "gtest/gtest.h"
 
-std::string dr_directory()
-{
-    char* label ("DR_DIRECTORY");
-    std::string directory (getenv(label));
-    return directory;
-}
-std::string DR_DIRECTORY = dr_directory();
-
 
 void takePixelDifferences (float* pixels1, float* pixels0, float divisor,
                            int arraySize, float* outputPixels)
