@@ -3,7 +3,6 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include "GL/glew.h"
-#include "shader.h"
 
 class Display
 {

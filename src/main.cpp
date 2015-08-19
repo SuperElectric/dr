@@ -17,6 +17,13 @@ void rotatingMonkeyLoop()
     char* label ("DR_DIRECTORY");
     std::string DR_DIRECTORY (getenv(label));
 
+     //temporary white pixels
+        float* data = new float[10000000];
+        for (int i=0; i<10000000; i++){
+            data[i] = 1.0;
+        }
+
+
     int width = 1024;
     int height = 1024;
     Display display(width,height, "Hello World!", 1, 4);
@@ -25,13 +32,13 @@ void rotatingMonkeyLoop()
     Shader shader(DR_DIRECTORY + "/assets/basicShader");
     shader.Bind();
     Texture texture0 ((DR_DIRECTORY + "/assets/monkey_light_0.png").c_str());
-    texture0.Bind(1, "sampler_0");
+    texture0.Bind(0, "sampler_0");
     Texture texture1 ((DR_DIRECTORY + "/assets/monkey_light_1.png").c_str());
-    texture0.Bind(2, "sampler_1");
+    texture1.Bind(1, "sampler_1");
     Texture texture2 ((DR_DIRECTORY + "/assets/monkey_light_2.png").c_str());
-    texture0.Bind(3, "sampler_2");
+    texture2.Bind(2, "sampler_2");
     Texture texture3 ((DR_DIRECTORY + "/assets/monkey_light_3.png").c_str());
-    texture0.Bind(4, "sampler_3");
+    texture3.Bind(3, "sampler_3");
 
     float t=0, x=0, c=0, s=0;
     while(!display.IsClosed())
@@ -51,6 +58,10 @@ void rotatingMonkeyLoop()
         shader.Update(parameters);
         display.SetFrameBuffer(0);
         display.Clear(0.0f,0.0f,0.0f,1.0f);
+        texture0.Bind(0, "sampler_0");
+        texture1.Bind(1, "sampler_1");
+        texture2.Bind(2, "sampler_2");
+        texture3.Bind(3, "sampler_3");
         mesh.Draw();
 
         {
@@ -63,34 +74,28 @@ void rotatingMonkeyLoop()
             }
             else if ((int)t % 180 < 120)
             {
-                //display.SetRenderBuffer(0,1);
+//                display.SetRenderBuffer(0,1);
                 i=1;
             }
             else
             {
-                //display.SetRenderBuffer(0,2);
+//                display.SetRenderBuffer(0,2);
                 i=2;
             }
             display.ShowTexture(n,i);
-            //display.CopyFrameBuffer();
+//            display.CopyFrameBuffer();
             display.Update();
         }
         //std::cin.ignore();
         t += 1.0;
         x = 0.01*t;
     }
+
+    delete[] data;
 }
 
-//void monkeyloop2(){
-//    Scene scene();
-//}
 
 int main()
 {
-    // loads monkey model and basic shaders, and renders it twice, with
-    // different colours, into separate offscreen framebuffers, and copies
-    // one of these to the screen framebuffer. To demonstrate, the monkey
-    // is shown rotating, while the framebuffer to be copied is swapped
-    // every 60 frames
     rotatingMonkeyLoop();
 }

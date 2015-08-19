@@ -1,7 +1,7 @@
 #include "display.h"
 #include "shader.h"
-#include <GL/glew.h>
 #include <iostream>
+#include <algorithm>
 
 Display::Display(int width, int height, const std::string& title,
                  const int numberOfFrameBuffers,
@@ -14,8 +14,8 @@ Display::Display(int width, int height, const std::string& title,
     m_width = width;
     m_height = height;
     // for now, render resolution and window size are set to be the same.
-    render_width = 1.0*width;
-    render_height = 1.0*height;
+    render_width = 2.0*width;
+    render_height = 2.0*height;
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -36,6 +36,14 @@ Display::Display(int width, int height, const std::string& title,
         std::cerr << "Glew failed to initialize!" << std::endl;
     }
     m_isClosed = false;
+
+
+    // note the current active texture unit and bound texture
+    GLint active_texture_unit;
+    GLint bound_texture;
+    glGetIntegerv(GL_ACTIVE_TEXTURE, &active_texture_unit);
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &bound_texture);
+
 
     //
     // Set up offscreen framebuffers
@@ -64,8 +72,12 @@ Display::Display(int width, int height, const std::string& title,
         for (int j=0; j<NUM_COLOUR_TEXTURE_BUFFERS; j++)
         {
             glBindTexture(GL_TEXTURE_2D, m_texturerenderbuffers[i][j]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, render_width, render_height, 0, GL_RGB, GL_FLOAT, NULL);
-            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+j,
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+j,
                                       GL_TEXTURE_2D, m_texturerenderbuffers[i][j], 0);
         }
 
@@ -78,11 +90,10 @@ Display::Display(int width, int height, const std::string& title,
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    glEnable(GL_DEPTH_TEST);
 
     // Set up a single textured point for rendering.
     glGenVertexArrays(1, &m_quad_vertexarray);
-    /* perhaps not needed, since we may not need to pass in any attributes */
+    /* perhaps not needed, since we may not need to pass in any attributes
     //
     //
     GLint currentBufferBinding;
@@ -97,7 +108,7 @@ Display::Display(int width, int height, const std::string& title,
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, currentBufferBinding);
     //
-    //
+    // */
     m_quad_program = glCreateProgram();
     char* label ("DR_DIRECTORY");
     std::string DR_DIRECTORY (getenv(label));
@@ -106,13 +117,19 @@ Display::Display(int width, int height, const std::string& title,
     glAttachShader(m_quad_program, m_quad_vertshader);
     glAttachShader(m_quad_program, m_quad_fragshader);
     //
-    glBindAttribLocation(m_quad_program, 0, "dummyAttribute");
+    // glBindAttribLocation(m_quad_program, 0, "dummyAttribute");
     //
     glLinkProgram(m_quad_program);
     CheckShaderError(m_quad_program, GL_LINK_STATUS, true, "Error: drawTexture program linking failed: ");
     glValidateProgram(m_quad_program);
     CheckShaderError(m_quad_program, GL_VALIDATE_STATUS, true, "Error: Program is invalid: ");
 
+    // rebind previously bound texture
+    glActiveTexture(active_texture_unit);
+    glBindTexture(GL_TEXTURE_2D, bound_texture);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_POINT_SPRITE);
 }
 
 Display::~Display()
@@ -136,7 +153,7 @@ Display::~Display()
 
     // destroy single Gl point and shaders
     //
-    glDeleteBuffers(1, &m_quad_vertexbuffer);
+    // glDeleteBuffers(1, &m_quad_vertexbuffer);
     //
     glDeleteVertexArrays(1, &m_quad_vertexarray);
     glDetachShader(m_quad_program, m_quad_vertshader);
@@ -193,17 +210,38 @@ void Display::CopyFrameBuffer()
 void Display::ShowTexture(int n, int i){
     glUseProgram(m_quad_program);
 
+    GLint active_texture_unit;
+    GLint bound_texture;
+    glGetIntegerv(GL_ACTIVE_TEXTURE, &active_texture_unit);
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &bound_texture);
+    // detach the texture from the framebuffer. This may not be necessary
+    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffers[n]);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i,
+                                      GL_TEXTURE_2D, 0, 0);
+    // set the texture
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_texturerenderbuffers[n][i]);
+    glGenerateMipmap(GL_TEXTURE_2D);
     glUniform1i(glGetUniformLocation(m_quad_program, "sampler0"), 0);
 
+    // render the point sprite to the screen framebuffer.
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+    glViewport(0,0,m_width,m_height);
     glBindVertexArray(m_quad_vertexarray);
-    glPointSize(1000.0);
+    glPointSize(std::max(m_width, m_height));
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDrawArrays(GL_POINTS, 0,1);
+
+    // unbind VAO and the frame buffer. Reactivate the previously active texture unit,
+    // and rebind the previously bound texture. Reattach m_tex.. to the framebuffer
+    // todo: rebind the correct texture to GL_TEXTURE0
     glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(active_texture_unit);
+    glBindTexture(GL_TEXTURE_2D, bound_texture);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffers[n]);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i,
+                                     GL_TEXTURE_2D, m_texturerenderbuffers[n][i], 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 

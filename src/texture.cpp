@@ -12,6 +12,8 @@ Texture::Texture(const char* fileName)
 		std::cerr << "Unable to load texture: " << std::endl;
 
     glGenTextures(1, &m_texture);
+    GLint bound_texture;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &bound_texture);
     glBindTexture(GL_TEXTURE_2D, m_texture);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -21,6 +23,7 @@ Texture::Texture(const char* fileName)
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     stbi_image_free(data);
+    glBindTexture(GL_TEXTURE_2D, bound_texture);
 }
 
 Texture::~Texture()
@@ -29,10 +32,10 @@ Texture::~Texture()
 }
 
 void Texture::Bind(int i, char* samplerName){
-    glActiveTexture(GL_TEXTURE0+i);
-    glBindTexture(GL_TEXTURE_2D, m_texture);
     GLint shader;
+    GLint textureunit;
     glGetIntegerv(GL_CURRENT_PROGRAM, &shader);
     glUniform1i(glGetUniformLocation(shader, samplerName), i);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0+i);
+    glBindTexture(GL_TEXTURE_2D, m_texture);
 }

@@ -10,7 +10,7 @@ class Texture
         Texture(const char* fileName);
         void Bind(int i, char* samplerName);
         virtual ~Texture();
-    private:
+    //private:
         Texture(const Texture& texture) {}
         void operator=(const Texture& texture) {}
         GLuint m_texture;
