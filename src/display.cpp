@@ -14,8 +14,8 @@ Display::Display(int width, int height, const std::string& title,
     m_width = width;
     m_height = height;
     // for now, render resolution and window size are set to be the same.
-    render_width = 2.0*width;
-    render_height = 2.0*height;
+    render_width = 1.0*width;
+    render_height = 1.0*height;
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
