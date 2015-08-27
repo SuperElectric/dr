@@ -33,7 +33,6 @@ Texture::~Texture()
 
 void Texture::Bind(int i, char* samplerName){
     GLint shader;
-    GLint textureunit;
     glGetIntegerv(GL_CURRENT_PROGRAM, &shader);
     glUniform1i(glGetUniformLocation(shader, samplerName), i);
     glActiveTexture(GL_TEXTURE0+i);

@@ -13,11 +13,7 @@ public:
     ParameterVector(int e);
     glm::mat4 cameraTransformMatrix;
     glm::mat4 cameraProjectionMatrix;
-    glm::vec3 lightPosition;
-    glm::vec3 lightColour;
-    glm::vec3 materialDiffuseColour;
-    glm::vec3 materialSpecularColour;
-    GLfloat materialSpecularHardness;
+    glm::vec3 sphericalHarmonicCoefficients[9];
 };
 
 ParameterVector operator+(ParameterVector a, ParameterVector b);

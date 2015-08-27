@@ -74,8 +74,8 @@ Display::Display(int width, int height, const std::string& title,
             glBindTexture(GL_TEXTURE_2D, m_texturerenderbuffers[i][j]);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, render_width, render_height, 0, GL_RGB, GL_FLOAT, NULL);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+j,
                                       GL_TEXTURE_2D, m_texturerenderbuffers[i][j], 0);
@@ -221,7 +221,7 @@ void Display::ShowTexture(int n, int i){
     // set the texture
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_texturerenderbuffers[n][i]);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    //glGenerateMipmap(GL_TEXTURE_2D);
     glUniform1i(glGetUniformLocation(m_quad_program, "sampler0"), 0);
 
     // render the point sprite to the screen framebuffer.
@@ -252,6 +252,20 @@ void Display::SaveTexture(int n, int i, float* pixels)
     glReadBuffer(GL_COLOR_ATTACHMENT0+i);
     glReadPixels(0,0,render_width,render_height,GL_RGB,GL_FLOAT,pixels);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+
+// detaches the texture (n,i) from the frame buffer (n), and binds this texture to
+// sampler with name samplerName in the fragment shader
+void BindTexture(int n, int i, int textureUnit, int samplerName){
+    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffers[n]);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i,
+                                      GL_TEXTURE_2D, 0, 0);
+    GLint shader;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &shader);
+    glUniform1i(glGetUniformLocation(shader, samplerName), textureUnit);
+    glActiveTexture(GL_TEXTURE0+textureUnit);
+    glBindTexture(GL_TEXTURE_2D, m_texturerenderbuffers[n][i]);
 }
 
 

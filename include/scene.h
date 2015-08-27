@@ -5,6 +5,10 @@
 #include "tiny_obj_loader.h"
 
 class Scene{
+    public:
+        Mesh mesh ();
+        Mesh square;
+
 };
 
 

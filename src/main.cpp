@@ -94,8 +94,7 @@ void rotatingMonkeyLoop()
     delete[] data;
 }
 
-
 int main()
 {
-    rotatingMonkeyLoop();
+    total_rewrite();
 }

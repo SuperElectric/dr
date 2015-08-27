@@ -6,11 +6,6 @@ ParameterVector::ParameterVector(int e)
     {
         cameraTransformMatrix = glm::mat4(0.0);
         cameraProjectionMatrix = glm::mat4(0.0);
-        lightPosition = glm::vec3(0.0,0.0,0.0);
-        lightColour = glm::vec3(0.0,0.0,0.0);
-        materialDiffuseColour = glm::vec3(0.0,0.0,0.0);
-        materialSpecularColour = glm::vec3(0.0,0.0,0.0);
-        materialSpecularHardness = 0.0;
     }
     else if (e == DEFAULT)
     {
@@ -21,11 +16,10 @@ ParameterVector::ParameterVector(int e)
         float zNear = 0.1;
         float zFar = 100.0;
         cameraProjectionMatrix = glm::perspective(80.0f, 1.0f, zNear, zFar);
-        lightPosition = glm::vec3(-1.0,1.0,0.0);
-        lightColour = glm::vec3(1.0,1.0,1.0);
-        materialDiffuseColour = glm::vec3(0.5,0.5,0.5);
-        materialSpecularColour = glm::vec3(0.0,0.0,0.0);
-        materialSpecularHardness = 10.0;
+    }
+
+    for (int i=0; i<9; i++){
+        sphericalHarmonicCoefficients[i] = 0.0;
     }
 }
 
@@ -34,11 +28,9 @@ ParameterVector operator+(ParameterVector a, ParameterVector b)
     ParameterVector result(ParameterVector::ZEROES);
     result.cameraTransformMatrix = a.cameraTransformMatrix + b.cameraTransformMatrix;
     result.cameraProjectionMatrix = a.cameraProjectionMatrix + b.cameraProjectionMatrix;
-    result.lightPosition = a.lightPosition + b.lightPosition;
-    result.lightColour = a.lightColour + b.lightColour;
-    result.materialDiffuseColour = a.materialDiffuseColour + b.materialDiffuseColour;
-    result.materialSpecularColour = a.materialSpecularColour + b.materialSpecularColour;
-    result.materialSpecularHardness = a.materialSpecularHardness + b.materialSpecularHardness;
+    for (int i=0; i<9; i++){
+        result.sphericalHarmonicCoefficients[i] = a.sphericalHarmonicCoefficients[i] + b.sphericalHarmonicCoefficients[i];
+    }
     return result;
 }
 
@@ -47,11 +39,9 @@ ParameterVector operator*(float a, ParameterVector b)
     ParameterVector result(ParameterVector::ZEROES);
     result.cameraTransformMatrix = a*b.cameraTransformMatrix;
     result.cameraProjectionMatrix = a*b.cameraProjectionMatrix;
-    result.lightPosition = a*b.lightPosition;
-    result.lightColour = a*b.lightColour;
-    result.materialDiffuseColour = a*b.materialDiffuseColour;
-    result.materialSpecularColour = a*b.materialSpecularColour;
-    result.materialSpecularHardness = a*b.materialSpecularHardness;
+    for (int i=0; i<9; i++){
+        result.sphericalHarmonicCoefficients[i] = a*b.sphericalHarmonicCoefficients[i];
+    }
     return result;
 }
 

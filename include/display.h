@@ -13,10 +13,11 @@ class Display
         void Clear(float r, float g, float b, float a);
         void Update();
         void SetFrameBuffer(int n=-1);
-        void SetRenderBuffer(int n,int i);
+        void SetRenderBuffer(int n, int i);
         void CopyFrameBuffer();
         void ShowTexture(int n, int i);
         void SaveTexture(int n, int i, float* pixels);
+        void BindTexture(int n, int i, int textureUnit, int samplerName);
         bool IsClosed();
         virtual ~Display();
         int render_width;

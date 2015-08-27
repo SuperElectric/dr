@@ -23,11 +23,15 @@ class Shader
         enum {U_CAMERA_4X4_TRANSFORM_MATRIX,
               U_CAMERA_3X3_ROTATION_MATRIX,
               U_CAMERA_4X4_PROJECTION_MATRIX,
-              U_LIGHT_POSITION,
-              U_LIGHT_COLOUR,
-              U_MATERIAL_DIFFUSE_COLOUR,
-              U_MATERIAL_SPECULAR_COLOUR,
-              U_MATERIAL_SPECULAR_HARDNESS,
+              //U_LIGHT_POSITION,
+              //U_LIGHT_COLOUR,
+              //U_MATERIAL_DIFFUSE_COLOUR,
+              //U_MATERIAL_SPECULAR_COLOUR,
+              //U_MATERIAL_SPECULAR_HARDNESS,
+              U_SPHERICAL_HARMONIC_COEFFICIENTS,
+              U_IS_FIRST_PASS,
+              U_RESOLUTION_X,
+              U_RESOLUTION_Y,
               NUM_UNIFORMS};
         GLuint m_program;
         GLuint m_shaders[NUM_SHADERS];

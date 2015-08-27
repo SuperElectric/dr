@@ -21,6 +21,56 @@ Mesh::Mesh(const tinyobj::shape_t &shape,
     init(shape, materials);
 }
 
+Mesh::Mesh()
+{
+    float positions[12] = {1.0,1.0,0.0,
+                           -1.0,1.0,0.0,
+                           -1.0,-1.0,0.0,
+                           1.0,-1.0,0.0}
+    float texcoords[8] = {1.0,1.0,
+                          0.0,1.0,
+                          0.0,0.0,
+                          1.0,0.0};
+    float normals[12] = {0.0,0.0,0.0,
+                         0.0,0.0,0.0,
+                         0.0,0.0,0.0,
+                         0.0,0.0,0.0};
+    int indices[6] = {0,1,2,0,2,3};
+    m_numIndices = 6;
+    glGenVertexArrays(1, &m_VAO);
+    glBindVertexArray(m_VAO);
+    glGenBuffers(NUM_BUFFERS, m_buffers);
+
+    GLint currentBufferBinding;
+    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &currentBufferBinding);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[XYZ_VB]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(positions[0])*12,
+                 positions, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(ATTRIBUTE_VERTEX_POSITIONS);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[UV_VB]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(texcoords[0])*8,
+                 texcoords, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(ATTRIBUTE_VERTEX_TEX_COORDS);
+    glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,0,0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[NORMALS_VB]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(normals[0])*12,
+                 normals, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(ATTRIBUTE_VERTEX_NORMALS);
+    glVertexAttribPointer(2,3,GL_FLOAT,GL_FALSE,0,0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers[INDEX_VB]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0])*6,
+                 indices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, currentBufferBinding);
+    glBindVertexArray(0);
+
+    m_isSquare = true;
+}
 
 Mesh::~Mesh()
 {
@@ -70,6 +120,8 @@ void Mesh::init(const tinyobj::shape_t &shape,
 
     glBindBuffer(GL_ARRAY_BUFFER, currentBufferBinding);
     glBindVertexArray(0);
+
+    m_isSquare = false;
 }
 
 
