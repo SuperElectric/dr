@@ -2,7 +2,7 @@
 #define DISPLAY_H
 #include <SDL2/SDL.h>
 #include <string>
-// #include "GL/glew.h"
+ #include "GL/glew.h"
 
 class Display
 {

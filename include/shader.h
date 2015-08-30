@@ -14,7 +14,7 @@ class Shader
         Shader(std::string fileName);
         void Bind();
         void Update(float t);
-        void Update(ParameterVector parameters);
+        void Update(ParameterVector parameters, bool isFirstPass, int resolutionX, int resolutionY);
         GLint GetUniformLocation(char* name);
         virtual ~Shader();
     protected:

@@ -27,7 +27,7 @@ Shader::Shader(std::string fileName){
 //    m_uniforms[U_MATERIAL_DIFFUSE_COLOUR] = glGetUniformLocation(m_program, "materialDiffuseColour");
 //    m_uniforms[U_MATERIAL_SPECULAR_COLOUR] = glGetUniformLocation(m_program, "materialSpecularColour");
 //    m_uniforms[U_MATERIAL_SPECULAR_HARDNESS] = glGetUniformLocation(m_program, "materialSpecularHardness");
-    m_uniforms[U_SPHERICAL_HARMONIC_COEFFICIENTS] = glGetUniformLocation(m_program, "spherical_harmonic_coefficients")
+    m_uniforms[U_SPHERICAL_HARMONIC_COEFFICIENTS] = glGetUniformLocation(m_program, "spherical_harmonic_coefficients");
     m_uniforms[U_IS_FIRST_PASS] = glGetUniformLocation(m_program, "is_first_pass");
     m_uniforms[U_RESOLUTION_X] = glGetUniformLocation(m_program, "resolution_x");
     m_uniforms[U_RESOLUTION_Y] = glGetUniformLocation(m_program, "resolution_y");
@@ -36,11 +36,11 @@ Shader::Shader(std::string fileName){
 }
 
 
-void Shader::Update(ParameterVector parameters, bool isFirstPass, int resolutionX, int resolutionY, ){
+void Shader::Update(ParameterVector parameters, bool isFirstPass, int resolutionX, int resolutionY){
 
     glUniformMatrix4fv(m_uniforms[U_CAMERA_4X4_TRANSFORM_MATRIX], 1, GL_FALSE, &parameters.cameraTransformMatrix[0][0]);
     glUniformMatrix4fv(m_uniforms[U_CAMERA_4X4_PROJECTION_MATRIX], 1, GL_FALSE, &parameters.cameraProjectionMatrix[0][0]);
-    glUniform3fv(m_uniforms[U_SPHERICAL_HARMONIC_COEFFICIENTS], 9, GL_FALSE, parameters.sphericalHarmonicCoefficients);
+    glUniform3fv(m_uniforms[U_SPHERICAL_HARMONIC_COEFFICIENTS], 9, &parameters.sphericalHarmonicCoefficients[0][0]);
     glUniform1i(m_uniforms[U_IS_FIRST_PASS], isFirstPass);
     glUniform1i(m_uniforms[U_RESOLUTION_X], resolutionX);
     glUniform1i(m_uniforms[U_RESOLUTION_Y], resolutionY);

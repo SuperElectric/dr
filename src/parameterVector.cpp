@@ -19,7 +19,7 @@ ParameterVector::ParameterVector(int e)
     }
 
     for (int i=0; i<9; i++){
-        sphericalHarmonicCoefficients[i] = 0.0;
+        sphericalHarmonicCoefficients[i] = glm::vec3(0.0,0.0,0.0);
     }
 }
 
