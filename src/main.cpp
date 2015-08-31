@@ -98,13 +98,76 @@ void total_rewrite(){
     char* label ("DR_DIRECTORY");
     std::string DR_DIRECTORY (getenv(label));
 
-    // The Display class only handles SDL stuff, and sets settings in its constructor
+
+    // The Display class only handles SDL stuff, and sets SDL settings in its constructor
     int width = 1024;
     int height = 1024;
     Display display(width,height, "");
+
+
+    // Create a mesh from an OBJ file, and create a simple square for doing compositing
+    // from textures which have been rendered to.
+
+
+    // Create a texture, preferably a 2D array type, for texturing the loaded mesh.
+    // Bind this texture to some texture unit, and to the appropriate sampler in
+    // the fragment shader.
+    // Generate all mip-map levels for this texture; make sure these are being sampled correctly
+
+
+    // Create two shader programs, from files. The first is used for shading the mesh.
+    // The second shader is used for compositing: namely calculating the motion derivatives
+    // from the image of the mesh and the depth map.
+    // Create a third shader program and corresponding vs and fs files for displaying
+    // the render result on-screen, or in a differently scaled framebuffer
+    // It is probably good to implement the three different types of shaders in three
+    // different classes, each normally used only once.
+
+
+    // Create a framebuffer, and create N textures and corresponding colour attachments
+    // on the framebuffer (or alternatively create a single 2D-array type texture).
+    // Also create a depth texture and the corresponding attachment
+    // (but of course this could just be a colour texture instead)
+    // bind these textures to appropriate unused texture units
+
+
+    // Enable depth testing
+
     float t=0, x=0, c=0, s=0;
     while(!display.IsClosed())
     {
+        // bind the offscreen frame buffer and, if a 2d-array type texture is not used,
+        // activate only the image-itself attachment and the depth attachment for rendering.
+        // Clear the depth and colour using glClear(...)
+        // Bind the mesh-shader and draw the mesh.
+        // Activate only the derivative attachments
+        // Bind the compositing-shader
+        // Detach the image and depth textures from the framebuffer, in order to use as textures
+        //   (if this is really necessary, we can't really use a single 2d-array type texture for
+        //    all the derivatives and the image)
+        // Bind these textures to the appropriate texture units
+        // Clear the actual depth buffer, but not the depth map texture
+        // Update the compositing-shader with resolution info
+        // Draw a square
+
+        // Now detach all derivative textures from the framebuffer
+        // Bind all these textures to appropriate texture units, and to appropriate samplers in
+        // the displaying-fragment-shader.
+        // Bind the displaying-fragment-shader
+        // Update information such as display mode, and which derivative to display
+        // Clear depth and colour
+        // Draw a square
+
+
+
+        // Note: make sure that the depth map passed to the compositing shader has the depth
+        // of any "undrawn" pixels set to 1.0
+
+
+
+
+
+
         glClearColor(0.0,0.15,0.5,1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         display.Update();

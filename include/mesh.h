@@ -11,7 +11,6 @@ class Mesh{
         Mesh(const tinyobj::shape_t &shape,
              const std::vector<tinyobj::material_t> &materials);
         Mesh();
-        // Get rid of this method.
         void Draw();
         virtual ~Mesh();
         enum {ATTRIBUTE_VERTEX_POSITIONS,
