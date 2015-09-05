@@ -1,12 +1,12 @@
 #version 430
 
-in bool is_first_pass;
 in vec3 vertex_position;
 in vec2 vertex_tex_coord;
 in vec3 vertex_normal;
 out vec3 f_position;
 out vec2 f_tex_coord;
 out vec3 f_normal;
+uniform bool is_first_pass;
 uniform mat4 camera_transform_matrix;
 uniform mat4 camera_projection_matrix;
 

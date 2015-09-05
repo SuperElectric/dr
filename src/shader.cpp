@@ -72,6 +72,8 @@ GLint Shader::GetUniformLocation(char* name){
     return glGetUniformLocation(m_program, name);
 }
 
+
+
 GLuint CreateShader(const std::string& text, GLenum shaderType){
     GLuint shader = glCreateShader(shaderType);
     if (shader == 0){

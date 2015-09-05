@@ -13,10 +13,12 @@ class Shader
     public:
         Shader(std::string fileName);
         void Bind();
-        void Update(float t);
         void Update(ParameterVector parameters, bool isFirstPass, int resolutionX, int resolutionY);
         GLint GetUniformLocation(char* name);
         virtual ~Shader();
+        GLuint gluint(){
+            return m_program;
+        }
     protected:
     private:
         enum {NUM_SHADERS=2};
@@ -37,4 +39,5 @@ class Shader
         GLuint m_shaders[NUM_SHADERS];
         GLuint m_uniforms[NUM_UNIFORMS];
 };
+
 #endif // SHADER_H

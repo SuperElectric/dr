@@ -93,91 +93,129 @@
 //    delete[] data;
 //}
 
-void total_rewrite(){
+void loop(){
 
     char* label ("DR_DIRECTORY");
     std::string DR_DIRECTORY (getenv(label));
 
-
-    // The Display class only handles SDL stuff, and sets SDL settings in its constructor
     int width = 1024;
     int height = 1024;
     Display display(width,height, "");
+    Mesh mesh((DR_DIRECTORY + "/assets/monkey2.obj").c_str());
+    Mesh square;
+    Texture surfaceColourTexture((DR_DIRECTORY + "/assets/monkey.png").c_str());
+    Shader shadingShader((DR_DIRECTORY + "/assets/SHshader").c_str());
+    Shader displayingShader((DR_DIRECTORY + "/assets/drawTexture").c_str());
+    ParameterVector parameters(ParameterVector::DEFAULT);
 
-
-    // Create a mesh from an OBJ file, and create a simple square for doing compositing
-    // from textures which have been rendered to.
-
-
-    // Create a texture, preferably a 2D array type, for texturing the loaded mesh.
-    // Bind this texture to some texture unit, and to the appropriate sampler in
-    // the fragment shader.
-    // Generate all mip-map levels for this texture; make sure these are being sampled correctly
-
-
-    // Create two shader programs, from files. The first is used for shading the mesh.
-    // The second shader is used for compositing: namely calculating the motion derivatives
-    // from the image of the mesh and the depth map.
-    // Create a third shader program and corresponding vs and fs files for displaying
-    // the render result on-screen, or in a differently scaled framebuffer
-    // It is probably good to implement the three different types of shaders in three
-    // different classes, each normally used only once.
-
-
-    // Create a framebuffer, and create N textures and corresponding colour attachments
-    // on the framebuffer (or alternatively create a single 2D-array type texture).
-    // Also create a depth texture and the corresponding attachment
-    // (but of course this could just be a colour texture instead)
-    // bind these textures to appropriate unused texture units
-
-
+    GLuint frameBuffer;
+    GLuint imageBufferTexture;
+    GLuint depthBuffer;
+    glGenFramebuffers(1, &frameBuffer);
+    glGenTextures(1, &imageBufferTexture);
+    glGenRenderbuffers(1, &depthBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+    glBindTexture(GL_TEXTURE_2D, imageBufferTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_2D, imageBufferTexture, 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                              GL_RENDERBUFFER, depthBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
     // Enable depth testing
+    glEnable(GL_DEPTH_TEST);
 
     float t=0, x=0, c=0, s=0;
     while(!display.IsClosed())
     {
-        // bind the offscreen frame buffer and, if a 2d-array type texture is not used,
-        // activate only the image-itself attachment and the depth attachment for rendering.
-        // Clear the depth and colour using glClear(...)
-        // Bind the mesh-shader and draw the mesh.
-        // Activate only the derivative attachments
-        // Bind the compositing-shader
-        // Detach the image and depth textures from the framebuffer, in order to use as textures
-        //   (if this is really necessary, we can't really use a single 2d-array type texture for
-        //    all the derivatives and the image)
-        // Bind these textures to the appropriate texture units
-        // Clear the actual depth buffer, but not the depth map texture
-        // Update the compositing-shader with resolution info
-        // Draw a square
-
-        // Now detach all derivative textures from the framebuffer
-        // Bind all these textures to appropriate texture units, and to appropriate samplers in
-        // the displaying-fragment-shader.
-        // Bind the displaying-fragment-shader
-        // Update information such as display mode, and which derivative to display
-        // Clear depth and colour
-        // Draw a square
+        c = glm::cos(x);
+        s = glm::sin(x);
+        float elev = 0.5;
+        parameters.cameraTransformMatrix = glm::mat4(1.0,0.0,0.0 ,0.0,
+                                                     0.0,glm::cos(elev), glm::sin(elev),0.0,
+                                                     0.0,-glm::sin(elev), glm::cos(elev) ,0.0,
+                                                     0.0,0.0,-6.0,1.0)
+                                         * glm::mat4( c ,0.0,-s ,0.0,
+                                                     0.0,1.0,0.0,0.0,
+                                                      s ,0.0, c ,0.0,
+                                                     0.0,1.0,0.0,1.0);
 
 
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+        GLenum renderBufferList[3] = {GL_COLOR_ATTACHMENT0};
+        // remark: try swapping shadingShader.Bind() and glDrawBuffers(...) ?
+        glDrawBuffers(1, renderBufferList);
+        shadingShader.Bind();
+        shadingShader.Update(parameters, true, width, height);
+        surfaceColourTexture.Bind(0,"surface_colour_texture");
+        glClearColor(0.5,0.2,0.2,1.0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        mesh.Draw();
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);   // uncomment if really necessary
 
-        // Note: make sure that the depth map passed to the compositing shader has the depth
-        // of any "undrawn" pixels set to 1.0
+//
+//        {
+//            GLenum renderBufferList[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+//            glDrawBuffers(3, renderBufferList);
+//        }
+//        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+//        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
+//        glActiveTexture(GL_TEXTURE1+0);
+//        glBindTexture(GL_TEXTURE_2D, imageBufferTexture);
+//        glUniform1i(glGetUniformLocation(shadingShader.gluint(), "first_pass_colour"), 1);
+//        glActiveTexture(GL_TEXTURE1+1);
+//        glBindTexture(GL_TEXTURE_2D, depthBufferTexture);
+//        glUniform1i(glGetUniformLocation(shadingShader.gluint(), "first_pass_depth"), 2);
+//        glActiveTexture(GL_TEXTURE0);
+//        // Clear the actual depth buffer, but not the depth map texture
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//        // Update the compositing-shader with resolution info
+//        shadingShader.Update(parameters, false, width, height);
+//        // Draw a square
+//        square.Draw();
 
 
-
-
-
-
+        displayingShader.Bind();
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, imageBufferTexture);
+        glUniform1i(glGetUniformLocation(displayingShader.gluint(), "image"), 1);
+        parameters.sphericalHarmonicCoefficients[0] = glm::vec3(t,t,t);
+        displayingShader.Update(parameters, false, width, height);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //glViewport(0,0,width,height);
         glClearColor(0.0,0.15,0.5,1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        square.Draw();
+
         display.Update();
+
+    // uncomment if the line above that detaches imageBufferTexture from GL_COLOR_ATTACHMENT is also uncommented
+//        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+//        //glBindTexture(GL_TEXTURE_2D, imageBufferTexture); // uncomment if really necessary
+//        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, imageBufferTexture,0);
+
+        t += 1.0;
+        x = 0.01*t;
     }
-    t += 1.0;
-    x = 0.01*t;
+
+    // delete stuff
+    {
+        GLuint textures[1] = {imageBufferTexture};//, depthBufferTexture, derivativesBufferTexture};
+        glDeleteTextures(1, textures);
+    }
+    glDeleteRenderbuffers(1, &depthBuffer);
+    glDeleteFramebuffers(1, &frameBuffer);
 }
 
 
 int main()
 {
-    total_rewrite();
+    loop();
 }

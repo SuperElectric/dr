@@ -35,7 +35,7 @@ Mesh::Mesh()
                          0.0,0.0,0.0,
                          0.0,0.0,0.0,
                          0.0,0.0,0.0};
-    int indices[6] = {0,1,2,0,2,3};
+    int indices[6] = {0,2,1,0,3,2};
     m_numIndices = 6;
     glGenVertexArrays(1, &m_VAO);
     glBindVertexArray(m_VAO);
