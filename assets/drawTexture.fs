@@ -11,5 +11,5 @@ uniform sampler2D depth;
 uniform sampler2D derivatives;
 
 void main(){
-    color = texture2D(image, f_tex_coord);
+    color = texture2D(derivatives, f_tex_coord);
 }

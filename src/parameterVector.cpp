@@ -13,7 +13,7 @@ ParameterVector::ParameterVector(int e)
                                            0.0,1.0,0.0,0.0,
                                            0.0 ,0.0, 1.0 ,0.0,
                                            0.0,0.0,-2.0,1.0);
-        float zNear = 0.1;
+        float zNear = 0.01;
         float zFar = 100.0;
         cameraProjectionMatrix = glm::perspective(80.0f, 1.0f, zNear, zFar);
     }
