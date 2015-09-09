@@ -4,12 +4,20 @@ in vec3 f_position;
 in vec2 f_tex_coord;
 uniform int resolution_x;
 uniform int resolution_y;
-out vec4 color;
+out vec4 colour;
 
 uniform sampler2D image;
-uniform sampler2D depth;
+uniform sampler2D position;
 uniform sampler2D derivatives;
 
 void main(){
-    color = texture2D(derivatives, f_tex_coord);
+    vec4 derivative = texture2D(derivatives, f_tex_coord);
+    float magnitude = derivative.x + derivative.y + derivative.z;
+    if (magnitude > 0){
+        colour = vec4(magnitude, 0.0,0.0,1.0);
+    }
+    else{
+        colour = vec4(0.0,0.0,-magnitude,1.0);
+    }
+    colour = derivative;
 }

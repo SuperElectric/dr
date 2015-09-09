@@ -104,19 +104,21 @@ void loop(){
     Display display(width,height, "");
     Mesh mesh((DR_DIRECTORY + "/assets/monkey2.obj").c_str());
     Mesh square;
-    Texture surfaceColourTexture((DR_DIRECTORY + "/assets/monkey.png").c_str());
+    Texture surfaceColourTexture((DR_DIRECTORY + "/assets/monkey_light_0.png").c_str());
     Shader shadingShader((DR_DIRECTORY + "/assets/SHshader").c_str());
     Shader displayingShader((DR_DIRECTORY + "/assets/drawTexture").c_str());
     ParameterVector parameters(ParameterVector::DEFAULT);
 
     GLuint frameBuffer;
     GLuint imageBufferTexture;
-    GLuint depthBufferTexture;
+    GLuint positionBufferTexture;
+    GLuint isNotSkyBufferTexture;
     GLuint derivativesBufferTexture;
     GLuint depthBuffer;
     glGenFramebuffers(1, &frameBuffer);
     glGenTextures(1, &imageBufferTexture);
-    glGenTextures(1, &depthBufferTexture);
+    glGenTextures(1, &positionBufferTexture);
+    glGenTextures(1, &isNotSkyBufferTexture);
     glGenTextures(1, &derivativesBufferTexture);
     glGenRenderbuffers(1, &depthBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
@@ -130,14 +132,23 @@ void loop(){
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                            GL_TEXTURE_2D, imageBufferTexture, 0);
 
-    glBindTexture(GL_TEXTURE_2D, depthBufferTexture);
+    glBindTexture(GL_TEXTURE_2D, positionBufferTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+                           GL_TEXTURE_2D, positionBufferTexture, 0);
+
+    glBindTexture(GL_TEXTURE_2D, isNotSkyBufferTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, NULL);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
-                           GL_TEXTURE_2D, depthBufferTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2,
+                           GL_TEXTURE_2D, isNotSkyBufferTexture, 0);
 
     glBindTexture(GL_TEXTURE_2D, derivativesBufferTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -145,7 +156,7 @@ void loop(){
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2,
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3,
                            GL_TEXTURE_2D, derivativesBufferTexture, 0);
 
 // will uncomment when I find how to read from array texture in the fragment shader
@@ -187,16 +198,20 @@ void loop(){
 
 
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-        {
-            GLenum renderBufferList[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
-            glDrawBuffers(3, renderBufferList);
-        }
         // remark: try swapping shadingShader.Bind() and glDrawBuffers(...) ?
         shadingShader.Bind();
         shadingShader.Update(parameters, true, width, height);
         surfaceColourTexture.Bind(0,"surface_colour_texture");
-        glClearColor(0.5,0.2,0.2,1.0);
+        {
+            GLenum renderBufferList[4] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+            glDrawBuffers(4, renderBufferList);
+        }
+        glClearColor(0.0,0.0,0.0,0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        {
+            GLenum renderBufferList[4] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, NULL};
+            glDrawBuffers(4, renderBufferList);
+        }
         mesh.Draw();
 //        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);   // uncomment if really necessary
 //        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);   // uncomment if really necessary
@@ -204,15 +219,18 @@ void loop(){
 
 
         {
-            GLenum renderBufferList[3] = {NULL,NULL,GL_COLOR_ATTACHMENT2};
-            glDrawBuffers(3, renderBufferList);
+            GLenum renderBufferList[4] = {NULL,NULL,NULL, GL_COLOR_ATTACHMENT3};
+            glDrawBuffers(4, renderBufferList);
         }
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, imageBufferTexture);
         glUniform1i(glGetUniformLocation(shadingShader.gluint(), "first_pass_colour"), 1);
         glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, depthBufferTexture);
-        glUniform1i(glGetUniformLocation(shadingShader.gluint(), "first_pass_depth"), 2);
+        glBindTexture(GL_TEXTURE_2D, positionBufferTexture);
+        glUniform1i(glGetUniformLocation(shadingShader.gluint(), "first_pass_position"), 2);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, isNotSkyBufferTexture);
+        glUniform1i(glGetUniformLocation(shadingShader.gluint(), "first_pass_is_not_sky"), 3);
         glActiveTexture(GL_TEXTURE0);
         glClear(GL_DEPTH_BUFFER_BIT);
         shadingShader.Update(parameters, false, width, height);
@@ -226,14 +244,12 @@ void loop(){
         glUniform1i(glGetUniformLocation(displayingShader.gluint(), "image"), 0);
 
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, depthBufferTexture);
-        glUniform1i(glGetUniformLocation(displayingShader.gluint(), "depth"), 1);
+        glBindTexture(GL_TEXTURE_2D, positionBufferTexture);
+        glUniform1i(glGetUniformLocation(displayingShader.gluint(), "position"), 1);
 
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, derivativesBufferTexture);
         glUniform1i(glGetUniformLocation(displayingShader.gluint(), "derivatives"), 2);
-
-        parameters.sphericalHarmonicCoefficients[0] = glm::vec3(t,t,t);
         displayingShader.Update(parameters, false, width, height);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         //glViewport(0,0,width,height);
@@ -254,7 +270,7 @@ void loop(){
 
     // delete stuff
     {
-        GLuint textures[3] = {imageBufferTexture, depthBufferTexture, derivativesBufferTexture};
+        GLuint textures[3] = {imageBufferTexture, positionBufferTexture, derivativesBufferTexture};
         glDeleteTextures(3, textures);
     }
     glDeleteRenderbuffers(1, &depthBuffer);
