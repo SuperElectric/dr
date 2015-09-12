@@ -20,6 +20,7 @@ Shader::Shader(std::string fileName){
     glValidateProgram(m_program);
     CheckShaderError(m_program, GL_VALIDATE_STATUS, true, "Error: Program is invalid: ");
     m_uniforms[U_CAMERA_4X4_TRANSFORM_MATRIX] = glGetUniformLocation(m_program, "camera_transform_matrix");
+//    m_uniforms[U_CAMERA_4X4_TRANSFORM_MATRIX_DERIVATIVE] = glGetUniformLocation(m_program, "camera_transform_matrix_derivative");
     m_uniforms[U_CAMERA_3X3_ROTATION_MATRIX] = glGetUniformLocation(m_program, "camera_rotation_matrix");
     m_uniforms[U_CAMERA_4X4_PROJECTION_MATRIX] = glGetUniformLocation(m_program, "camera_projection_matrix");
 //    m_uniforms[U_LIGHT_POSITION] = glGetUniformLocation(m_program, "lightPosition");
@@ -39,6 +40,7 @@ Shader::Shader(std::string fileName){
 void Shader::Update(ParameterVector parameters, bool isFirstPass, int resolutionX, int resolutionY){
 
     glUniformMatrix4fv(m_uniforms[U_CAMERA_4X4_TRANSFORM_MATRIX], 1, GL_FALSE, &parameters.cameraTransformMatrix[0][0]);
+    //glUniformMatrix4fv(m_uniforms[U_CAMERA_4X4_TRANSFORM_MATRIX_DERIVATIVE], 1, GL_FALSE, &parameters.cameraTransformMatrixDerivative[0][0]);
     glUniformMatrix4fv(m_uniforms[U_CAMERA_4X4_PROJECTION_MATRIX], 1, GL_FALSE, &parameters.cameraProjectionMatrix[0][0]);
     glUniform3fv(m_uniforms[U_SPHERICAL_HARMONIC_COEFFICIENTS], 9, &parameters.sphericalHarmonicCoefficients[0][0]);
     glUniform1i(m_uniforms[U_IS_FIRST_PASS], isFirstPass);

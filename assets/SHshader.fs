@@ -10,6 +10,7 @@ uniform int resolution_x;
 uniform int resolution_y;
 uniform vec3 spherical_harmonic_coefficients[9];
 uniform mat4 camera_transform_matrix;
+//uniform mat4 camera_transform_matrix_derivative;
 uniform mat4 camera_projection_matrix;
 
 uniform sampler2D surface_colour_texture;
@@ -32,6 +33,16 @@ vec2 motion_vector(float is_not_sky, vec4 position, mat4 D){  // D = derivative 
         mat4 M = camera_projection_matrix*camera_transform_matrix;
         return ((D*position).xy - (D*position).w * (M*position).xy / (M*position).w)
                / (M*position).w;
+    }
+}
+
+
+float depth(float is_not_sky, vec4 position){
+    if (is_not_sky > 0.5){
+        return -(camera_transform_matrix*position).z;
+    }
+    else{
+        return 1000.0;
     }
 }
 
@@ -62,28 +73,51 @@ void render_derivatives(){
     float is_not_sky_right = texture2D(first_pass_is_not_sky, f_tex_coord + vec2(pixel_size_x, 0.0)).x;
     float is_not_sky_up = texture2D(first_pass_is_not_sky, f_tex_coord + vec2(0.0, pixel_size_y)).x;
     float is_not_sky_down = texture2D(first_pass_is_not_sky, f_tex_coord - vec2(0.0, pixel_size_y)).x;
-    
+
+    float depth_center = depth(is_not_sky_center, position_center);
+    float depth_left = depth(is_not_sky_left, position_left);
+    float depth_right = depth(is_not_sky_right, position_right);
+    float depth_up = depth(is_not_sky_up, position_up);
+    float depth_down = depth(is_not_sky_down, position_down);
+
     mat4 matrix_direction = mat4(0.0);
     matrix_direction[3][0] = 1.0;
-    matrix_direction = camera_projection_matrix*camera_transform_matrix*matrix_direction; // moving the object in the x direction, in world space
+    matrix_direction = camera_projection_matrix*camera_transform_matrix*matrix_direction; // derivative wrt object x position in world space
 
     vec2 motion_vector_center = motion_vector(is_not_sky_center, position_center, matrix_direction);
     vec2 motion_vector_left = motion_vector(is_not_sky_left, position_left, matrix_direction);
     vec2 motion_vector_right = motion_vector(is_not_sky_right, position_right, matrix_direction);
     vec2 motion_vector_up = motion_vector(is_not_sky_up, position_up, matrix_direction);
     vec2 motion_vector_down = motion_vector(is_not_sky_down, position_down, matrix_direction);
-    
-    float depth;
-    if (is_not_sky_center < 0.5){
-        depth = 100.0;
+        
+    vec4 derivative = vec4(0.0,0.0,0.0,1.0);
+    if (depth_right < depth_center){
+        derivative = derivative + 0.5*(colour_center - colour_right)*motion_vector_right.x;
     }
     else{
-        depth = -(camera_transform_matrix*position_center).z;
+        derivative = derivative + 0.5*(colour_center - colour_right)*motion_vector_center.x;
     }
-    depth = 0.1*depth;
-    output_derivatives = vec3(colour_right - colour_left);
-    output_derivatives = vec3(motion_vector_center, 0.0);
-    output_derivatives = vec3(depth,0.0,0.0);
+    if (depth_left < depth_center){
+        derivative = derivative + 0.5*(colour_left - colour_center)*motion_vector_left.x;
+    }
+    else{
+        derivative = derivative + 0.5*(colour_left - colour_center)*motion_vector_center.x;
+    }
+    if (depth_up < depth_center){
+        derivative = derivative + 0.5*(colour_center - colour_up)*motion_vector_up.y;
+    }
+    else{
+        derivative = derivative + 0.5*(colour_center - colour_up)*motion_vector_center.y;
+    }
+    if (depth_down < depth_center){
+        derivative = derivative + 0.5*(colour_down - colour_center)*motion_vector_down.y;
+    }
+    else{
+        derivative = derivative + 0.5*(colour_down - colour_center)*motion_vector_center.y;
+    }
+
+    output_derivatives = derivative.xyz;
+//    output_derivatives = colour_center.xyz;
 }
 
 

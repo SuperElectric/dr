@@ -23,6 +23,7 @@ class Shader
     private:
         enum {NUM_SHADERS=2};
         enum {U_CAMERA_4X4_TRANSFORM_MATRIX,
+              U_CAMERA_4X4_TRANSFORM_MATRIX_DERIVATIVE,
               U_CAMERA_3X3_ROTATION_MATRIX,
               U_CAMERA_4X4_PROJECTION_MATRIX,
               //U_LIGHT_POSITION,

@@ -12,6 +12,7 @@ public:
 
     ParameterVector(int e);
     glm::mat4 cameraTransformMatrix;
+    //glm::mat4 cameraTransformMatrixDerivative;
     glm::mat4 cameraProjectionMatrix;
     glm::vec3 sphericalHarmonicCoefficients[9];
 };
